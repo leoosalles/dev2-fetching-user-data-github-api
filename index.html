@@ -9,21 +9,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./src/css/reset.css">
     <link rel="stylesheet" href="./src/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.14.0/devicon.min.css">
     <title>GitHub API - Fetching Users with Fetch</title>
 </head>
 
 <body>
-    <main>
+    <main role="main">
         <i class="devicon-github-original"></i>
+        <h1>GitHub Search User</h1>
 
         <section class="container">
-            <header>
-                <h2>Search User</h2>
+            <form role="search">
+                <label for="input-search">Search User</label>
                 <input type="text" id="input-search" placeholder="Enter the GitHub username">
-                <input type="button" value="Search" id="btn-search">
-            </header>
+                <button type="submit" id="btn-search">Search</button>
+            </form>
 
-            <div class="profile-data"></div>
+            <div class="profile-data" role="region" aria-live="polite"></div>
         </section>
 
     </main>
