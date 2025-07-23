@@ -1,0 +1,77 @@
+body {
+    font-family: "Kumbh Sans", sans-serif;
+    background-color: #222;
+    color: #fff;
+}
+
+label {
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+main,
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+i {
+    margin: 1.5em 0 .25em;
+    font-size: 4rem;
+}
+
+h1,
+label {
+    margin-bottom: 1em;
+}
+
+.container {
+    background-color: #fff;
+    color: #222;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    justify-content: center;
+    padding: 1em;
+}
+
+label,
+input,
+button {
+    display: block;
+}
+
+form {
+    width: 100%;
+    text-align: center;
+}
+
+input {
+    width: 90%;
+    padding: .75em;
+    margin: 0 auto;
+    border: 1px solid #b9b9b9;
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgb(205, 205, 205);
+}
+
+button {
+    font-weight: bold;
+    padding: .75em 2.75em;
+    margin: 2em auto 0;
+    border-radius: 20px;
+    border: none;
+}
+
+input:hover,
+input:focus {
+    outline: none;
+    box-shadow: 0 4px 10px rgb(205, 205, 205);
+}
+
+button:hover {
+    font-weight: bolder;
+    color: #fff;
+    background-color: #222;
+}
