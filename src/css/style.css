@@ -2,6 +2,7 @@ body {
     font-family: "Kumbh Sans", sans-serif;
     background-color: #222;
     color: #fff;
+    padding-bottom: 100px;
 }
 
 label {
@@ -26,6 +27,10 @@ label {
     margin-bottom: 1em;
 }
 
+canvas {
+    width: 80%;
+}
+
 .container {
     background-color: #fff;
     color: #222;
@@ -33,12 +38,19 @@ label {
     width: 90%;
     max-width: 500px;
     justify-content: center;
+    align-items: center;
     padding: 1em;
 }
 
-label,
-input,
 button {
+    cursor: pointer;
+    border-radius: 20px;
+    border: none;
+}
+
+form label,
+form input,
+form button {
     display: block;
 }
 
@@ -56,12 +68,11 @@ input {
     box-shadow: 0 2px 5px rgb(205, 205, 205);
 }
 
-button {
+#btn-search {
     font-weight: bold;
     padding: .75em 2.75em;
     margin: 2em auto 0;
-    border-radius: 20px;
-    border: none;
+    background-color: #b9b9b9;
 }
 
 input:hover,
@@ -70,8 +81,88 @@ input:focus {
     box-shadow: 0 4px 10px rgb(205, 205, 205);
 }
 
-button:hover {
+#btn-search:hover {
     font-weight: bolder;
     color: #fff;
+    background-color: rgb(106, 106, 106);
+}
+
+.hidden {
+    opacity: 0;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.container div.profile-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2em 0;
+}
+
+.container div.profile-data div.info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 1em;
+}
+
+.container div.profile-data div.info img {
+    width: 50%;
+    border-radius: 50%;
+    border: 10px solid rgb(226, 209, 15);
+    margin-bottom: 1.25em;
+}
+
+.container div.profile-data div.info div.data h2,
+.container div.profile-data div.info div.data p {
+    text-align: center;
+    margin-bottom: .5em;
+}
+
+.container div.repositories {
+    text-align: center;
+    padding: 1em;
     background-color: #222;
+    color: #fff;
+    border-radius: 10px;
+}
+
+.container div.repositories h2,
+.container div.repositories p,
+.container div.repositories div.carousel h3,
+.container div.repositories div.carousel img {
+    margin-bottom: 1em;
+}
+
+.container div.repositories div.carousel img {
+    width: 100%;
+}
+
+.container div.repositories div.repo-btn-container {
+    display: flex;
+    justify-content: space-around;
+}
+
+.container div.repositories button.btn-arrow {
+    background-color: rgb(226, 209, 15);
+    color: #222;
+    width: 110px;
+    font-size: .85rem;
+    padding: .5em .5em;
+    margin: 0 .35em;
+}
+
+@media (min-width: 500px) {
+    #btn-search {
+        padding: 1em 3em;
+    }
+
+    .container div.repositories button.btn-arrow {
+        width: 150px;
+        font-size: 1rem;
+    }
 }
