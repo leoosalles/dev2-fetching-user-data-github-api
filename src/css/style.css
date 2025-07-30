@@ -32,10 +32,6 @@ label {
     margin-bottom: 1em;
 }
 
-canvas {
-    width: 80%;
-}
-
 .container {
     background-color: #fff;
     color: #222;
@@ -172,7 +168,7 @@ input:focus {
 .container div.repositories button.btn-arrow:hover,
 .container div.repositories button.btn-arrow:focus {
     font-weight: bolder;
-    background-color: rgb(238, 255, 3);
+    background-color: rgb(255, 175, 3);
 }
 
 .image-loader {
