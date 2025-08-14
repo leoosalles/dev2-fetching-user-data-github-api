@@ -8,6 +8,7 @@ body {
 :root {
     --grey: #b9b9b9;
     --yellow: rgb(255, 237, 43);
+    --black: #222
 }
 
 label {
@@ -34,7 +35,7 @@ label {
 
 .container {
     background-color: #fff;
-    color: #222;
+    color: var(--black);
     border-radius: 10px;
     width: 90%;
     max-width: 500px;
@@ -64,7 +65,7 @@ form button {
 
 .btn-arrow {
     background-color: var(--yellow);
-    color: #222;
+    color: var(--black);
     width: 110px;
     font-size: .85rem;
     padding: .5em .5em;
@@ -91,8 +92,7 @@ input:focus {
     box-shadow: 0 4px 10px rgb(205, 205, 205);
 }
 
-#btn-search:hover,
-#btn-search:focus {
+#btn-search:is(:hover, :focus) {
     font-weight: bolder;
     color: #fff;
     background-color: rgb(106, 106, 106);
@@ -111,7 +111,7 @@ input:focus {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2em 0;
+    margin: 2em 0;
 }
 
 .container div.profile-data div.info {
@@ -138,14 +138,13 @@ input:focus {
     width: 100%;
     text-align: center;
     padding: 1em;
-    background-color: #222;
+    background-color: var(--black);
     color: #fff;
     border-radius: 10px;
 }
 
 .container div.repositories h2,
 .container div.repositories p.repo-counter,
-.container div.repositories div.carousel,
 .container div.repositories div.carousel img,
 .container div.repositories div.carousel h3 {
     margin-bottom: 1em;
@@ -193,6 +192,7 @@ input:focus {
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
@@ -206,5 +206,106 @@ input:focus {
     .container div.repositories button.btn-arrow {
         width: 150px;
         font-size: 1rem;
+    }
+}
+
+@media (min-width: 900px) {
+    body {
+        padding-bottom: 25px;
+    }
+
+    i {
+        margin: .5em 0 .25em;
+        font-size: 3rem;
+    }
+
+    .container {
+        width: 80%;
+        max-height: 625px;
+        max-width: 1000px;
+        padding: 1.5em;
+    }
+
+    form {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    label {
+        width: 100%;
+    }
+
+    input {
+        width: 50%;
+        margin: 0;
+        justify-self: center;
+        font-size: 1rem;
+    }
+
+    button,
+    input {
+        border-radius: 30px;
+    }
+
+    #btn-search {
+        width: 150px;
+        margin: 0 0 0 3em;
+        font-size: 1rem;
+    }
+
+    .container div.profile-data {
+        flex-direction: row;
+        gap: 15px;
+        margin: 2em 0 0;
+        border-top: 1px solid var(--grey);
+        padding-top: 1.5em;
+    }
+
+    .container div.profile-data div.info {
+        max-width: 400px;
+    }
+
+    .container div.profile-data div.data {
+        width: 85%;
+    }
+
+    .container div.repositories {
+        background-color: #fff;
+        padding: 0;
+    }
+
+    .container div.repositories h2,
+    .container div.repositories p.repo-counter,
+    #repo-link {
+        color: var(--black);
+    }
+
+    .container div.repositories h2 {
+        margin-bottom: .25em;
+    }
+
+    .container div.repositories div.carousel {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 270px;
+        color: var(--black);
+    }
+
+    .container div.repositories div.carousel img {
+        max-height: 270px;
+    }
+
+    .image-loader {
+        height: 306px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .container div.repositories div.repo-btn-container {
+        justify-content: center;
+        gap: 4em;
     }
 }
