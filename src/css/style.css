@@ -8,7 +8,10 @@ body {
 :root {
     --grey: #b9b9b9;
     --yellow: rgb(255, 237, 43);
-    --black: #222
+    --black: #222;
+
+    --preview-h-lg: 328px;
+    --preview-w-lg: 432px;
 }
 
 label {
@@ -289,7 +292,8 @@ input:focus {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        min-height: 270px;
+        min-height: var(--preview-h-lg);
+        min-width: var(--preview-w-lg);
         color: var(--black);
     }
 
@@ -298,7 +302,8 @@ input:focus {
     }
 
     .image-loader {
-        height: 306px;
+        max-height: var(--preview-h-lg);
+        max-width: var(--preview-w-lg);
         display: flex;
         justify-content: center;
         align-items: center;
