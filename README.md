@@ -521,3 +521,366 @@ input:focus {
 **Benefit:** Ensures the interface is usable and visually appealing on all devices, from mobile to desktop.<br><br>
 
 ---
+
+## 💡 JavaScript Files Documentation (index.js & Modules)
+
+### `index.js`
+
+```js
+import { getUser } from './services/users.js';
+```
+
+**Purpose:** Import the `getUser` function to fetch GitHub user data.
+
+**Benefit:** Enables modular code by separating API calls from UI logic.<br><br>
+
+```js
+import { getRepos } from './services/repositories.js';
+```
+
+**Purpose:** Import the `getRepos` function to fetch repositories of a user.
+
+**Benefit:** Provides access to a user's repository data in a structured way.<br><br>
+
+```js
+import { userObj } from './objects/user.js';
+```
+
+**Purpose:** Import the `userObj` object to store user and repository data.
+
+**Benefit:** Centralizes state management for user data.<br><br>
+
+```js
+import { screen } from './objects/screen.js';
+```
+
+**Purpose:** Import the `screen` object to handle DOM rendering.
+
+**Benefit:** Separates rendering logic from data logic for cleaner code.<br><br>
+
+```js
+import { setCurrentUsername, setCurrentRepo } from './global.js';
+```
+
+**Purpose:** Import functions to manage global state of the current username and repository index.
+
+**Benefit:** Ensures consistent state management across the app.<br><br>
+
+```js
+import { formatHttpError } from './utils/formatHttpError.js';
+```
+
+**Purpose:** Import utility to format HTTP errors from API requests.
+
+**Benefit:** Provides user-friendly error messages.<br><br>
+
+```js
+const inputSearch = document.getElementById('input-search');
+```
+
+**Purpose**: Select the search input element from the DOM.
+
+**Benefit:** Enables reading the username entered by the user.<br><br>
+
+#### 🔍 Trigger GitHub User Search
+
+```js
+function triggerSearch() {
+    const userName = inputSearch.value.trim();
+    if (userName) {
+        setCurrentUsername(userName);
+        setCurrentRepo(0);
+        getUserData(userName);
+    };
+};
+```
+
+##### `function triggerSearch() {`
+
+- **Purpose:** Defines a new function named `triggerSearch`.
+- **Benefit:** Encapsulates the search logic so it can be reused whenever a search action is triggered.
+
+##### `const userName = inputSearch.value.trim();`
+
+- **Purpose:** Retrieves the current value from the search input field (`inputSearch`) and removes any leading or trailing whitespace using `trim()`.
+- **Benefit:** Ensures that the username is clean and avoids unnecessary errors caused by extra spaces.
+
+##### `if (userName) {`
+
+- **Purpose:** Checks if `userName` is not an empty string or falsy value.
+- **Benefit:** Prevents unnecessary API requests and errors when the input field is empty.
+
+##### `setCurrentUsername(userName);`
+
+- **Purpose:** Calls the `setCurrentUsername` function to update the global `currentUsername` variable with the input value.
+- **Benefit:** Keeps track of the username currently being searched, which is used by other modules like repositories and carousel.
+
+##### `setCurrentRepo(0);`
+
+- **Purpose:** Resets the current repository index to `0` by calling `setCurrentRepo`.
+- **Benefit:** Ensures that when a new user is searched, the repository carousel starts from the first repository.
+
+##### `getUserData(userName)`
+
+- **Purpose:** Calls the `getUserData` function, passing the entered username, to fetch the user and repository information from GitHub.
+- **Benefit:** Initiates the API requests to retrieve and display the GitHub user's profile and repositories.<br><br>
+
+#### 📨 Handle Search Form Submission
+
+```js
+document.getElementById('search-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    triggerSearch();
+});
+```
+
+##### `document.getElementById('search-form').addEventListener('submit', (event) => {`
+
+- **Purpose:** Selects the form with id `search-form` and attaches a `submit` event listener that receives the event object.
+-  **Benefit:** Captures both button clicks and *Enter* key submissions in one place, letting you customize what happens when the form is submitted.
+
+##### `event.preventDefault();`
+
+- **Purpose:** Cancel the browser's default form submission behavior (page reload + HTTP request).
+- **Benefit:** Keeps the app on the same page so you can handle the submission with JavaScript (fetch data, update UI) without a full refresh.
+
+##### `triggerSearch();`
+
+- **Purpose:** Invoke the centralized search routine that reads input, sets state, and fetches user/repo data.
+- **Benefit:** Reuses the same logic everywhere, ensuring consistent behavior and reducing code duplication.<br><br>
+
+#### 🛰️ Fetch and Display GitHub User Profile & Repositories
+
+```js
+async function getUserData(userName) {
+    try {
+        const userResponse = await getUser(userName);
+
+        if (!userResponse.ok) {
+            screen.renderError(formatHttpError(userResponse, 'User'));
+            return;
+        };
+
+        const userData = await userResponse.json();
+        userObj.setInfo(userData);
+
+        let repoData;
+
+        try {
+            repoData = await getRepos(userName);
+        } catch (repoError) {
+            screen.renderError(formatHttpError({ status: repoError.code || 500, url: '', ok: false }, 'Repositories'));
+            return;
+        };
+
+        userObj.setRepositories(repoData);
+
+        screen.renderUser(userObj);
+        screen.renderRepo(userObj);
+    } catch (err) {
+        screen.renderError(formatHttpError({ status: 500, url: '', ok: false }, 'Request'));
+    };
+};
+```
+
+##### `async function getUserData(userName) {`
+
+- **Purpose:** Defines an asynchronous function that accepts a GitHub username — the value previously captured in the `triggerSearch()` function from the search input and stored in its local `userName` variable — to retrieve and display the corresponding user and repository data from the GitHub API.
+- **Benefit:** Allows use of `await` for cleaner, sequential async flow tied to a specific user.
+
+##### `try {`
+
+- **Purpose:** Starts a protected block for the user-fetch workflow.
+- **Benefit:** Ensures network/parse failures are caught and handled gracefully.
+
+##### `const userResponse = await getUser(userName);`
+
+- **Purpose:** Calls the service that fetches the user profile from GitHub.
+- **Benefit:** Retrieves the raw HTTP response needed to validate status and parse data.
+
+##### `if (!userResponse.ok) {`
+
+- **Purpose:** Checks whether the HTTP request succeeded.
+- **Benefit:** Prevents attempting to parse or use a failed response.
+
+##### `screen.renderError(formatHttpError(userResponse, 'User'));`
+
+- **Purpose:** Builds a user-friendly error message and displays it in the UI.
+- **Benefit:** Gives immediate feedback about why the user profile couldn't be loaded.
+
+##### `return;`
+
+- **Purpose:** Stops further execution when the user fetch fails.
+- **Benefit:** Avoids cascading errors and unnecessary API calls.
+
+##### `const userData = await userResponse.json();`
+
+- **Purpose:** Parses the successful response body as JSON.
+- **Benefit:** Converts the payload into a usable JavaScript object.
+
+##### `userObj.setInfo(userData);`
+
+- **Purpose:** Stores core user fields (avatar, name, bio, login) in the app's user object.
+- **Benefit:** Centralizes state so the UI and other modules can access normalized user data.
+
+##### `let repoData;`
+
+- **Purpose:** Declares a variable to hold repositories data.
+- **Benefit:** Makes the variable available across the nested try/catch and subsequent steps.
+
+##### `try {`
+
+- **Purpose:** Starts a protected block for the repositories-fetch workflow.
+- **Benefit:** Separately handles repo-specific failures from user fetch errors.
+
+##### `repoData = await getRepos(userName);`
+
+- **Purpose:** Requests the list of public repositories for the user.
+- **Benefit:** Gathers content needed to populate the carousel and counters.
+
+##### `} catch (repoError) {`
+
+- **Purpose:** Captures errors thrown while fetching repositories.
+- **Benefit:** Enables tailored feedback specific to repository issues.
+
+
+##### `screen.renderError(formatHttpError({ status: repoError.code || 500, url: '', ok: false }, 'Repositories'));`
+
+- **Purpose:** Normalizes the error (even when it's a thrown object) and renders it.
+- **Benefit:** Consistent, informative error messaging for repo failures.
+
+##### `return;`
+
+- **Purpose:** Terminates the function execution upon a repository fetch failure.
+- **Benefit:** Prevents rendering with incomplete or undefined repo data.
+
+##### `userObj.setRepositories(repoData);`
+
+- **Purpose:** Persists the fetched repositories in the user object.
+- **Benefit:** Makes repo data available for UI rendering and navigation.
+
+##### `screen.renderUser(userObj);`
+
+- **Purpose:** Renders the user profile section (avatar, name, bio).
+- **Benefit:** Immediately shows the user's identity details in the UI.
+
+##### `screen.renderRepo(userObj);`
+
+- **Purpose:** Renders the repositories section, including carousel and controls.
+- **Benefit:** Presents interactive repo previews and navigation to the user.
+
+##### `} catch (err) {`
+
+- **Purpose:** Catches any unexpected errors from the outer workflow.
+- **Benefit:** Provides a final safety net for unanticipated failures.
+
+##### `screen.renderError(formatHttpError({ status: 500, url: '', ok: false }, 'Request'));`
+
+- **Purpose:** Displays a generic "request" error when the exact cause is unknown.
+- **Benefit:** Ensures the UI always communicates that something went wrong.<br><br>
+
+### `users.js`
+
+#### 🔍 Fetch GitHub User Data (`getUser`)
+
+```js
+async function getUser(userName) {
+    const response = await fetch(`https://api.github.com/users/${userName}`);
+    
+    return response;
+};
+
+export { getUser };
+```
+
+##### `async function getUser(userName) {`
+
+- **Purpose:** Declares an asynchronous function that takes a GitHub username as its parameter.
+- **Benefit:** Enables the use of `await` inside the function and clearly scopes the username input for the API call.
+
+##### `const response = await fetch('https://api.github.com/users/${userName}');`
+
+- **Purpose:** Sends an HTTP GET request to the GitHub Users API endpoint for the provided `userName`, waiting for network response.
+- **Benefit:** Retrieves the raw `Response` object from GitHub, allowing the caller to decide how to handle status codes and when/if to parse JSON.
+
+##### `return response;`
+
+- **Purpose:** Returns the `Response` object to the caller.
+- **Benefit:** Keeps the function focused on fetching only, giving upstream code full control over error handling (`response.ok`) and data extraction (`response.json()`).
+
+##### `export { getUser };`
+
+- **Purpose:** Exports `getUser` as a named export from the module.
+- **Benefit:** Makes the function importable elsewhere (`import { getUser } from './services/users.js';`), promoting modularity and reuse.<br><br>
+
+### `repositories.js`
+
+#### 🔍 Fetch GitHub Repositories by Username
+
+```js
+import { formatHttpError } from '../utils/formatHttpError.js';
+
+async function getRepos(userName) {
+    const response = await fetch(`https://api.github.com/users/${userName}/repos`);
+
+    if (!response.ok) throw formatHttpError(response, 'Repositories');
+
+    const repos = await response.json();
+
+    if (repos.length === 0) {
+        throw formatHttpError({
+            status: 404,
+            url: `https://api.github.com/users/${userName}/repos`
+        }, 'Repositories')
+    };
+
+    return repos;
+};
+
+export { getRepos };
+```
+
+##### `import { formatHttpError } from '../utils/formatHttpError.js';`
+
+- **Purpose:** Imports the `formatHttpError` utility to handle API errors.
+- **Benefit:** Centralizes error formatting and ensures consistent error messages throughout the application.
+
+##### `async function getRepos(userName) {`
+
+- **Purpose:** Defines an asynchronous function `getRepos` that accepts a GitHub username as an argument.
+- **Benefit:** Enables the function to perform asynchronous operations, like fetching repository data from the GitHub API.
+
+##### `const response = await fetch('https://api.github.com/users/${userName}/repos');`
+
+- **Purpose:** Makes a `fetch` request to GitHub's API endpoint to retrieve the repositories of the specified user.
+- **Benefit:** Retrives the user's repository data in real time for dynamic display in the application.
+
+##### `if (!response.ok) throw formatHttpError(response, 'Repositories');`
+
+- **Purpose:** Checks if the API response indicates an error (non-OK HTTP status).
+- **Benefit:** Ensures proper error handling by throwing a formatted error if the request fails, improving reliability and user feedback.
+
+##### `const repos = await response.json();`
+
+- **Purpose:** Converts the API response from JSON format into a JavaScript object/array.
+- **Benefit:** Makes the repository data usable in the application for rendering and manipulation.
+
+##### `if (repos.length === 0) {`
+
+- **Purpose:** Checks if the returned repository array is empty.
+- **Benefit:** Provides a safeguard against displaying an empty carousel or list when a user has no repositories.
+
+##### `throw formatHttpError({ status: 404, url: 'https://api.github.com/users/${userName}/repos' }, 'Repositories')`
+
+- **Purpose:** Throws a custom formatted error indicating that no repositories were found.
+- **Benefit:** Provides clear feedback to the user when a GitHub account exists but has no repositories, maintaining consistent error messaging.
+
+##### `return repos;`
+
+- **Purpose:** Returns the repository data array to the caller.
+- **Benefit:** Allows other modules (like `screen.js`) to access and display the repository information dynamically.
+
+##### `export { getRepos };`
+
+- **Purpose:** Exports the `getRepos` function for use in other modules.
+- **Benefit:** Makes this module reusable and keeps the code organized with modular imports/exports.
