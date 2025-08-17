@@ -779,7 +779,54 @@ async function getUserData(userName) {
 - **Purpose:** Displays a generic "request" error when the exact cause is unknown.
 - **Benefit:** Ensures the UI always communicates that something went wrong.<br><br>
 
-### `users.js`
+### `global.js`
+
+#### 🌍 Global State Manager
+
+```js
+export let currentUsername = "";
+export let currentRepo = 0;
+
+export function setCurrentUsername(username) {
+    currentUsername = username;
+};
+
+export function setCurrentRepo(repo) {
+    currentRepo = repo;
+};
+```
+
+##### `export let currentUsername = "";`
+
+- **Purpose:** Declares and exports a mutable module-level variable named `currentUsername`, initialized to an empty string.
+- **Benefit:** Serves as a single source of truth for the username currently being searched; because it is exported, other modules can read this value (they will see updates thanks to ES module live bindings).
+
+##### `export let currentRepo = 0;`
+
+- **Purpose:** Declares and exports a mutable module-level variable named `currentRepo`, initialized to `0`;
+- **Benefit:** Tracks the index of the currently selected repository (used by the carousel); exporting it lets other modules read the current index without passing it through function arguments.
+
+##### `export function setCurrentUsername(userName) {`
+
+- **Purpose:** Exports a function named `setCurrentUsername` that accepts a `username` parameter.
+- **Benefit:** Provides a single, explicit API to update `currentUsername` from other modules, improving encapsulation and making state changes intentional and easy to audit.
+
+##### `currentUsername = username;`
+
+- **Purpose:** Assigns the provided `username` value, passed as an argument to this function, to the `currentUsername` variable.
+- **Benefit:** Updates the shared state so all modules that consume `currentUsername` (via import) see the new value immediately due to ES module live bindings.
+
+##### `export function setCurrentRepo(repo) {`
+
+- **Purpose:** Exports a function named `setCurrentRepo` that accepts a `repo` parameter (an index).
+- **Benefit:** Offers a controlled way to change the `currentRepo` index, avoiding ad-hoc mutations and making intent explicit when navigating repositories.
+
+##### `currentRepo = repo;`
+
+- **Purpose:** Assigns the provided `repo` value to the current `currentRepo` variable.
+- **Benefit:** Updates the globally shared repository index so UI modules (carousel, screen) will act on the new index consistently.<br><br>
+
+### `services/users.js`
 
 #### 🔍 Fetch GitHub User Data (`getUser`)
 
@@ -813,7 +860,7 @@ export { getUser };
 - **Purpose:** Exports `getUser` as a named export from the module.
 - **Benefit:** Makes the function importable elsewhere (`import { getUser } from './services/users.js';`), promoting modularity and reuse.<br><br>
 
-### `repositories.js`
+### `services/repositories.js`
 
 #### 🔍 Fetch GitHub Repositories by Username
 
@@ -883,4 +930,373 @@ export { getRepos };
 ##### `export { getRepos };`
 
 - **Purpose:** Exports the `getRepos` function for use in other modules.
-- **Benefit:** Makes this module reusable and keeps the code organized with modular imports/exports.
+- **Benefit:** Makes this module reusable and keeps the code organized with modular imports/exports.<br><br>
+
+### `utils/formatHttpError.js`
+
+#### 🛑 HTTP Error Formatter
+
+```js
+function formatHttpError(response, context = 'Request') {
+    const { status, url } = response;
+
+    let message;
+
+    switch (status) {
+        case 404:
+            message = getNotFoundMessage(context);
+            break;
+        case 403:
+            message = "🚫 Access denied. You may have exceeded GitHub's request limit.";
+            break;
+        case 500:
+            message = "💥 Internal server error. Please try again later.";
+            break;
+        default:
+            message = "⚠️ An unexpected error occurred. Please check your connection or try again.";
+    }
+
+    return {
+        code: status,
+        message,
+        url,
+        context,
+        fullMessage: `${context} failed with status ${status}: ${message} [URL: ${url}]`
+    };
+};
+
+function getNotFoundMessage(context) {
+    switch (context) {
+        case 'User':
+            return "😢 User not found. Please check the user name and try again.";
+        case 'Repositories':
+            return "📭 No repositories found for this user.";
+        case 'Image':
+            return "🖼️ Unable to display repository image.";
+        default:
+            return "🔍 Resource not found.";
+    };
+};
+
+export { formatHttpError };
+```
+
+##### `function formatHttpError(response, context = 'Request') {`
+
+- **Purpose:** Declares a function named `formatHttpError` that accepts an HTTP `response` object and an optional `context` string (defaulting to '`Request`').
+- **Benefit:** Encapsulates error-normalization logic in one place so every module can convert raw HTTP responses into consistent, user-friendly error objects.
+
+##### `const { status, url } = response;`
+
+- **Purpose:** Destructures the `status` and `url` properties from the provided `response` object.
+- **Benefit:** Makes HTTP status code and request URL directly available with concise names for use in error messages logic.
+
+##### `let message;`
+
+- **Purpose:** Declares a `message` variable that will hold the human-readable error text.
+- **Benefit** Prepares a single place to assign context-specific messages that will be returned to the caller.
+
+##### `switch (status) {`
+
+- **Purpose:** Starts a `switch` statement to set `message` based on the HTTP status code.
+- **Benefit:** Provides a clear and scalable structure for mapping status codes to user-facing messages.
+
+##### `case 404:`
+
+- **Purpose:** Handles the `404 Not Found` HTTP status.
+- **Benefit:** Allows the function to return a precise, helpful message when a requested resource doesn't exist.
+
+##### `message = getNotFoundMessage(context);`
+
+- **Purpose:** Sets `message` by calling `getNotFoundMessage` with the current `context`.
+- **Benefit:** Produces a context-aware "not found" message (e.g., different phrasing for missing users vs. missing repositories).
+
+##### `break;`
+
+- **Purpose:** Exits the `case 404` branch.
+- **Benefit:** Prevents fall-through to subsequent cases, keeping logic correct and predictable.
+
+##### `case 403:`
+
+- **Purpose:** Handles the `403 Forbidden` HTTP status.
+- **Benefit:** Captures authorization/rate-limit scenarios separately so users get actionable feedback.
+
+##### `message = "🚫 Access denied. You may have exceeded GitHub's request limit.";`
+
+- **Purpose:** Assigns a clear message explaining the likely reason
+ for a `403`.
+- **Benefit:** Informs users about rate-limiting or permission issues and helps them understand next steps.
+
+##### `break;`
+
+- **Purpose:** Exits the `case 403` branch.
+- **Benefit:** Keeps the switch-flow isolated for each status code.
+
+##### `case 500:`
+
+- **Purpose:** Handles the `500 Internal Server Error` HTTP status.
+- **Benefit:** Differentiates server-side failures from client-side issues.
+
+##### `message = "💥 Internal server error. Please try again later.";`
+
+- **Purpose:** Provides a user-facing message for server errors.
+- **Benefit:** Sets appropriate expectations (this is a server problem, not a client mistake).
+
+##### `break;`
+
+- **Purpose:** Exits the `case 500` branch.
+- **Benefit:** Prevents unintended fall-through.
+
+##### `default:`
+
+- **Purpose:** Provides a fallback for any other status codes not explicitly handled above.
+- **Benefit:** Ensures every possible response yields a sensible message instead of leaving `message` undefined.
+
+##### `message = "⚠️ An unexpected error occurred. Please check your connection or try again.";`
+
+- **Purpose:** Assigns a generic message for unknown errors.
+- **Benefit:** Gives users a helpful, non-technical prompt when the cause is unclear.
+
+##### `return { code: status, message, url, context, fullMessage: '${context} failed with status ${status}: ${message} [URL: ${url}] };'`
+
+- **Purpose:** Returns a standardized error object containing:
+  - `code`: the HTTP status,
+  - `message`: the user-friendly text,
+  - `url`: the request URL,
+  - `context`: the functional area (e.g., 'User' or 'Repositories'),
+  - `fullMessage`: a detailed diagnostic string for logs or debugging.
+- **Benefit:** Provides both UI-friendly and developer-friendly information in a single consistent structure that callers can render or log as needed.
+
+##### `function getNotFoundMessage(context) {`
+
+- **Purpose:** Declares a helper function to produce context-sensitive "not found" messages.
+- **Benefit:** Centralizes variations of 404 messaging so wording is consistent and easy to maintain.
+
+##### `switch (context) {`
+
+- **Purpose:** Executes different logic depending on the value of the `context` argument.
+- **Benefit:** Enables different messages for different parts of the app (user vs. repositories vs. images).
+
+##### `case 'User':`
+
+- **Purpose:** Handles the case where the missing resource is a GitHub user.
+- **Benefit:** Allows a tailored message that directly tells the user the username isn't found.
+
+##### `return "😢 User not found. Please check the user name and try again.";`
+
+- **Purpose:** Returns a friendly 404 message specific to users.
+- **Benefit:** Improves UX by suggesting the likely corrective action (check the username).
+
+##### `case 'Repositories':`
+
+- **Purpose:** Handles the case where the missing resource is a repository list.
+- **Benefit:** Enables a different tone and information for a repositories-related 404.
+
+##### `return "📭 No repositories found for this user.";`
+
+- **Purpose:** Returns a clear message indicating no repositories exist for that account.
+- **Benefit:** Prevents confusion between a non-existent user and a user who simply has no repositories.
+
+##### `case 'Image':`
+
+- **Purpose:** Handles the case where a preview image couldn't be retrieved.
+- **Benefit:** Allows a message focused on preview/image failures rather than data fetching.
+
+##### `return "🖼️ Unable to display repository image.";`
+
+- **Purpose:** Returns a short explanation about image preview failure.
+- **Benefit:** Keeps users informed when only the visual preview is unavailable while links/data may still be present.
+
+##### `default:`
+
+- **Purpose:** Fallback when `context` is not recognized.
+- **Benefit:** Ensures the function always returns a meaningful string.
+
+##### `return "🔍 Resource not found.";`
+
+- **Purpose:** Returns a generic "not found" message for unknown contexts.
+- **Benefit:** Maintains consistent behavior even if new contexts are introduced without updating this helper.
+
+##### `export { formatHttpError };`
+
+- **Purpose:** Exports `formatHttpError` as a named export from this module.
+- **Benefit:** Allows other modules (services, screen rendering etc.) to import and reuse a single, consistent error-formatting utility.<br><br>
+
+### `objects/user.js`
+
+#### 🧑‍💻 User Profile Data Model
+
+```js
+const userObj = {
+    avatarUrl: '',
+    name: '',
+    bio: '',
+    userName: '',
+    repositories: [],
+    setInfo(gitHubUser) {
+        this.avatarUrl = gitHubUser.avatar_url;
+        this.name = gitHubUser.name;
+        this.bio = gitHubUser.bio;
+        this.userName = gitHubUser.login;
+    },
+    setRepositories(repositories) {
+        this.repositories = repositories;
+    }
+};
+
+export { userObj };
+```
+
+##### `const userObj = {`
+
+- **Purpose:** Declares a single, named object (`userObj`) that will hold user-related state and methods.
+- **Benefit:** Provides a centralized container for profile data and related behavior, simplifying access and updates across the app.
+
+##### `avatarUrl: '',`
+
+- **Purpose:** Reserves a string property to store the user's avatar URL (initially empty).
+- **Benefit:** Establishes a predictable field for rendering profile images; avoids undefined checks when the UI reads this property.
+
+##### `name: '',`
+
+- **Purpose:** Reserves a string property to store the user's display name.
+- **Benefit:** Keeps the user's readable name in a single place for UI rendering and avoids scattered data access.
+
+##### `bio: '',`
+
+- **Purpose:** Reserves a string property to store the user's biography or description.
+- **Benefit:** Ensures the profile text is available in a consistent field for presentation and accessibility.
+
+##### `userName: '',`
+
+- **Purpose:** Reserves a string property to store the user's GitHub login (username).
+- **Benefit:** Distinguishes the login identifier from the display name and allows other modules (e.g., URL builders) to reference the exact login.
+
+##### `repositories: [],`
+
+- **Purpose:** Reserves an array property to hold the user's repository list (initially empty).
+- **Benefit:** Provides a predictable place to store repo data for the carousel and other UI components, avoiding type checks before iteration.
+
+##### `setInfo(gitHubUser) {`
+
+- **Purpose:** Defines a method that accepts a GitHub API user object and maps its fields into the `userObj`.
+- **Benefit:** Encapsulates the mapping logic in one place, normalizing external API data to the app's internal shape and making future changes easy.
+
+##### `this.avatarUrl = gitHubUser.avatar_url;`
+
+- **Purpose:** Assigns the `avatar_url` value from the GitHub API response to the object's `avatarUrl` property.
+- **Benefit:** Converts the API's snake_case naming to the app’s camelCase convention, ensuring consistency and keeping the object updated for UI consumption.
+
+##### `this.name = gitHubUser.name;`
+
+- **Purpose:** Assigns the `name` value from the GitHub API response to the object's `name` property.
+- **Benefit:** Stores the human-readable name centrally so rendering logic simply reads `userObj.name`.
+
+##### `this.bio = gitHubUser.bio;`
+
+- **Purpose:** Assigns the `bio` value from the GitHub API response to te object's `bio` property.
+- **Benefit:** Preserves the user's description for immediate display and for any accessibility announcements.
+
+##### `this.userName = gitHubUser.login;`
+
+- **Purpose:** Assigns the `login` value (the GitHub handle) from the GitHub API response to the object's `userName` property.
+- **Benefit:** Keeps both display name and login available separately (useful for building URLs, previews, and consistent state).
+
+##### `setRepositories(repositories) {`
+
+- **Purpose:** Defines a method that accepts an array of repositories and assigns it to the object.
+- **Benefit:** Centralizes repository assignment so the UI and other modules always read from a single, updated source.
+
+##### `this.repositories = repositories;`
+
+- **Purpose:** Replaces the `repositories` array on the object with the fetched array.
+- **Benefit:** Ensures the object holds the latest repo data for rendering, pagination, and carousel logic without replacing the object reference.
+
+##### `export { userObj };`
+
+- **Purpose:** Exports `userObj` as a named export from the module.
+- **Benefit:** Provides other modules with a live reference to the same object; when `userObj` properties are updated via its methods, all importers observe the changes without needing to re-import or reassign values.<br><br>
+
+### `objects/screen.js`
+
+#### 🖥️ Screen Renderer & Error Handler Module
+
+```js
+import { currentRepo, setCurrentRepo } from '../global.js';
+```
+
+**Purpose:** Imports the shared carousel index and its setter from the global state module.
+
+**Benefit:** Enables this module to read/update which repository is currently shown without duplicating state.<br><br>
+
+```js
+import { updateRepoView } from '../utils/carousel.js';
+```
+
+**Purpose:** Imports the function that renders a single repository preview into the carousel.
+
+**Benefit:** Keeps rendering logic modular and reusable, reducing code repetition.<br><br>
+
+```js
+import { formatHttpError } from '../utils/formatHttpError.js';
+```
+
+**Purpose:** Imports a helper to normalize HTTP error objects/messages.
+
+**Benefit:** Ensures consistent, user-friendly error feedback across the UI.<br><br>
+
+```js
+let userDataEl = document.querySelector('.profile-data');
+```
+
+**Purpose:** Cache the container element where profile/repo content will be injected.
+
+**Benefit:** Minimizes repeated DOM queries and improves performance/readability.
+
+```js
+const screen = {
+```
+
+**Purpose:** Defines a UI controller object responsible for updating the view.
+
+**Benefit:** Centralizes all DOM rendering concerns behind a simple API.<br><br>
+
+```js
+userProfile: userDataEl,
+```
+
+**Purpose:** Stores the target DOM node on the controller for easy access.
+
+**Benefit:** Simplifies method implementations by avoiding re-querying the DOM.<br><br>
+
+#### 👤✨ Render User Profile Method
+
+```js
+renderUser(userObj) {
+    this.userProfile.innerHTML =
+        `<div class="info">
+         <img class="avatar" src="${userObj.avatarUrl}" alt="${userObj.name}'s GitHub Profile Picture">
+             <div class="data">
+                 <h2>${userObj.name ?? "Name not provided 😢"}</h2>
+                 <p>${userObj.bio ?? "This profile’s waiting for a story to tell 😢"}</p>
+             </div>
+         </div>`;
+
+    this.userProfile.classList.remove('hidden');
+},
+```
+
+##### `renderUser(userObj) {`
+
+- **Purpose:** Declares a method to render the user's profile section.
+- **Benefit:** Separates profile rendering from data gathering, improving cohesion.
+
+##### `this.userProfile.innerHTML = \ …HTML template… ;`
+
+- **Purpose:** Injects markup showing avatar, display name (with fallback), and bio (with fallback).
+- **Benefit:** Produces an accessible, consistently formatted profile view, even when fields are missing.
+
+##### ``this.userProfile.classList.remove('hidden');`
+
+- **Purpose:** Makes the profile container visible after injecting content.
+- **Benefit:** Prevents empty/flashy UI; only shows section when data exists.<br><br>
