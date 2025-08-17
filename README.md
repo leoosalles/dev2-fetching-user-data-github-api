@@ -1296,7 +1296,7 @@ renderUser(userObj) {
 - **Purpose:** Injects markup showing avatar, display name (with fallback), and bio (with fallback).
 - **Benefit:** Produces an accessible, consistently formatted profile view, even when fields are missing.
 
-##### ``this.userProfile.classList.remove('hidden');`
+##### `this.userProfile.classList.remove('hidden');`
 
 - **Purpose:** Makes the profile container visible after injecting content.
 - **Benefit:** Prevents empty/flashy UI; only shows section when data exists.<br><br>
