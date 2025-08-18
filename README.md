@@ -1689,3 +1689,29 @@ img.onerror = () => {
 - **Benefit:** Promotes modular architecture and code reuse across the application.<br><br>
 
 ---
+
+## 📱 Responsive Design  
+The layout adapts based on screen width:  
+
+| Screen Width | Main Adjustments |
+| ------------ | ---------------- |
+| `< 500px`    | Compact, centered layout; form and carousel stack vertically; images scale to full width. |
+| `≥ 500px`    | Larger search button; repository navigation buttons expand in width and font size. |
+| `≥ 900px`    | Wider container with max width (1000px); form reorganizes into inline layout; profile section becomes two-column (avatar + details); repositories use light background with centered carousel of fixed dimensions. |
+
+---
+
+## 🧪 Technologies Used  
+- Semantic HTML5 — for structured and accessible markup  
+- Modern CSS3 — including custom variables and responsive layouts for consistent styling  
+- JavaScript (ES6+) — for asynchronous data fetching, error handling, and dynamic DOM updates  
+- GitHub REST API — to fetch repository data and metadata dynamically  
+- Microlink API — to generate live preview screenshots of repositories
+
+---
+
+## 🙋 About the Author
+
+Developed by **Leonardo Salles de Oliveira**, a technology enthusiast with a passion for design, accessibility, clean code, and inclusive user interfaces.
+
+💼 [LinkedIn](https://www.linkedin.com/in/leonardosalles/)
