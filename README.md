@@ -1300,3 +1300,255 @@ renderUser(userObj) {
 
 - **Purpose:** Makes the profile container visible after injecting content.
 - **Benefit:** Prevents empty/flashy UI; only shows section when data exists.<br><br>
+
+#### 📂🎠 Render Repositories Carousel Method
+
+```js
+renderRepo(userObj) {
+    if (!Array.isArray(userObj.repositories) || userObj.repositories.length === 0) {
+        this.userProfile.insertAdjacentHTML('beforeend',
+              `<div class="repositories">
+                   <h2>Repositories</h2>
+                       <p class="repo-counter">Total repositories: 0</p>
+                       <p role="alert">No repository found</p>
+               </div>`
+        );
+
+        return;
+    }
+
+    let repoInfo =
+        `<div class="repositories">
+               <h2>Repositories</h2>
+                   <p class="repo-counter">Total repositories: ${userObj.repositories.length}</p>
+                   <div class="carousel"></div>
+                   <div class="repo-btn-container">
+                       <button id="btn-previous" class="btn-arrow" aria-label="Previous repository">previous repo</button>
+                       <button id="btn-next" class="btn-arrow" aria-label="Next repository">next repo</button>
+                   </div>
+         </div>`;
+
+    this.userProfile.insertAdjacentHTML('beforeend', repoInfo);
+
+    updateRepoView(userObj.repositories[currentRepo]);
+
+    document.getElementById('btn-next').onclick = () => {
+        let nextIndex = (currentRepo + 1) % userObj.repositories.length;
+
+        setCurrentRepo(nextIndex);
+
+        updateRepoView(userObj.repositories[nextIndex]);
+    };
+
+    document.getElementById('btn-previous').onclick = () => {
+        let prevIndex = (currentRepo - 1 + userObj.repositories.length) % userObj.repositories.length;
+
+        setCurrentRepo(prevIndex);
+
+        updateRepoView(userObj.repositories[prevIndex]);
+    };
+},
+```
+
+##### `renderRepo(userObj) {`
+
+- **Purpose:** Declares a method that receives the populated `userObj`.
+- **Benefit:** Centralizes the UI logic to display repositories for the current user.
+
+##### `if (!Array.isArray(userObj.repositories) || userObj.repositories.length === 0) {`
+
+- **Purpose:** Ensures that `userObj.repositories` is a valid array with content before proceeding. The condition `!Array.isArray(userObj.repositories)` checks whether the `repositories` property is not an array, while `userObj.repositories.length === 0` verifies if the array is empty. Together, these checks act as a guard clause to detect missing or empty repository data.
+- **Benefit:** By using `!Array.isArray(...) || ...length === 0`, the code avoids runtime errors and ensures a smooth user experience. Instead of breaking or displaying incorrect data, the UI can gracefully handle the absence of repositories. This makes the application more robust and user-friendly.
+
+##### `this.userProfile.insertAdjacentHTML('beforeend', …HTML template…);`
+
+- **Purpose:** Appends a structured "Repositories" section to the user profile whenn no repositories are available. The method `insertAdjacentHTML('beforeend', …)` injects a `<div>` containing a heading, a repository counter set to zero, and an alert message into the end of the `this.userProfile` element.
+
+- **Benefit:** Allows the interface to gracefully handle empty data states by clearly informing the user that no repositories were found. By using `insertAdjacentHTML`, the HTML is inserted efficiently without disrupting existing profile content. The semantic use of `<h2>` and `role="alert"` improves accessibility, while the layout remains consistent and informative even when data is missing.
+
+##### `return;`
+
+- **Purpose:** Exits early when there are no repositories.
+- **Benefit:** Prevents unnecessary processing and avoids setting up events or rendering logic that would have no effect.
+
+##### `let repoInfo = …HTML template…`
+
+- **Purpose:** Defines a structured HTML block for displaying repository data when available. It includes a heading, a dynamic repository count, a carousel placeholder, and navigation buttons.
+- **Benefit:** Enables efficient DOM insertion using `insertAdjacentHTML`, preserves readability and performance, ensures accessibility, and sets up the layout for interactive repository navigation.
+
+##### `this.userProfile.insertAdjacentHTML('beforeend', repoInfo);`
+
+- **Purpose:** Integrates the repositories interface into the user's profile area in a seamless and efficient manner, enabling immediate display of interactive elements upon data load or update. It is executed only if the repository contains at least one item, as determined by the preceding `if` statement.
+- **Benefit:** Avoids a full-render of the profile component, improving script performance and ensuring a smoother user experience. This approach also allows incremental UI updates while preserving the current state of the page. By conditionally injecting the UI only when relevant data exists, the script maintains a clean and purposeful DOM structure.
+
+##### `updateRepoView(userObj.repositories[currentRepo]);`
+
+- **Purpose:** Renders the preview for the currently selected repository.
+- **Benefit:** Immediately shows content instead of an empty carousel.
+
+##### `document.getElementById('btn-next').onclick = () => {`
+
+- **Purpose:** Attaches a click handler to the "next" button.
+- **Benefit:** Enables interactive navigation.
+
+##### `let nextIndex = (currentRepo + 1) % userObj.repositories.length;`
+
+- **Purpose:** Calculates the index of the next repository in the list when the "Next" button is clicked. This line uses modular arithmetic to increment the current index (`currentRepo`) by one and wrap around to the beginning of the array if the end is reached. The result is stored in `nextIndex`, which is then used to update the repository view.
+- **Benefit:** Enables seamless circular navigation through the user's repositories without causing out-of-bounds errors. By using the modulo operator (`%`) with `userObj.repositories.length`, the logic ensures that once the last repository is reached, the next click cycles back to the first item. This creates a smooth and intuitive carousel experience for the user, regardless of how many repositories are available.
+
+##### `setCurrentRepo(nextIndex);`
+
+- **Purpose:** Stores the updated index in the shared state to reflect the current repository.
+- **Benefit:** Ensures the carousel maintains its correct position when navigating or re-rendering.
+
+##### `updateRepoView(userObj.repositories[nextIndex]);`
+
+- **Purpose:** Updates the carousel display to show the newly selected repository.
+- **Benefit:** Provides instant visual confirmation of the user's navigation action.
+
+##### `document.getElementById('btn-previous').onclick = () => {`
+
+- **Purpose:** Attaches a click handler to the "previous" button.
+- **Benefit:** Enables backward navigation.
+
+##### `let prevIndex = (currentRepo - 1 + userObj.repositories.length) % userObj.repositories.length;`
+
+- **Purpose:** Calculates the index of the previous repository in the list when the "Previous" button is clicked. This line uses modular arithmetic to decrement the current index (`currentRepo`) by one and wrap around to the last item if the current index is at the last item if the current index is at the beginning of the array. The result is stored in `prevIndex`, which is then used to update the repository view.
+- **Benefit:** Enables smooth circular navigation through the user's repositories without causing out-of-bounds errors. By adjusting the index with `- 1 + userObj.repositories.length` before applying the modulo operator, the logic ensures that negative values are normalized and wrapped correctly. This allows the carousel to cycle back to the last repository when the user navigates backward from the first item, maintaining a consistent and intuitive user experience.
+
+##### `setCurrentRepo(prevIndex);`
+
+- **Purpose:** Stores the previous index in shared state.
+- **Benefit:** Ensures the carousel remains synchronized for future interactions.
+
+##### `updateRepoView(userObj.repositories[prevIndex]);`
+
+- **Purpose:** Re-renders the carousel with the previously selected repository.
+- **Benefit:** Instantly displays the selected repository.<br><br>
+
+#### ⚠️ renderError – Centralized Error Display
+
+```js
+renderError(response, context = 'Request') {
+    const error = (response && response.message && response.code !== undefined)
+        ? response
+        : formatHttpError(response, context);
+
+    let container;
+
+    switch (error.context) {
+        case 'User':
+            container = this.userProfile;
+            break;
+        case 'Repositories':
+            container = document.querySelector('.carousel') || this.userProfile;
+            break;
+        case 'Image':
+            container = document.querySelector('.carousel');
+            break;
+        default:
+            container = this.userProfile;
+    };
+        
+    if (!container) return;
+
+    container.innerHTML =
+        `<p>${error.message}</p>`;
+
+    this.userProfile.classList.remove('hidden');
+}
+```
+
+##### `renderError(response, context = 'Request') {`
+
+- **Purpose:** Handles and displays error messages in the UI based on the type of failure encountered during a request.
+- **Benefit:** Provides a centralized and consistent way to surface errors to the user, improving clarity and user experience.
+
+##### `const error = (response && response.message && response.code !== undefined) ? response : formatHttpError(response, context);`
+
+- **Purpose:** Normalizes the error: if `response` already has `message` and `code`, use it; otherwise, converts the raw response into a standardized error via `formatHttpError`.
+- **Benefit:** Guarantees a consistent error shape `({ code, message, url, context, ... })` for rendering, reducing conditional logic elsewhere.
+
+##### `let container;`
+
+- **Purpose:** Declares a variable to hold the target DOM where the error will be rendered.
+- **Benefit:** Enables selecting different UI regions dynamically based on error type.
+
+##### `switch (error.context) {`
+
+- **Purpose:** Chooses where to render the error based on its context.
+- **Benefit:** Displays the error message exactly in the section of the interface that corresponds to the nature of the error, making it easier for users to identify and resolve the issue.
+
+##### `case 'User':`
+
+- **Purpose:** Iniciates the switch branch for errors with a `context` value of `'User'`.
+- **Benefit:** Clearly separates user-related error handling from other error types so the logic is explicit and maintainable.
+
+##### `container = this.userProfile;`
+
+- **Purpose:** Assigns the profile DOM node to the `container` variable, ensuring that any UI updates related to user errors are applied to the correct section of the interface.
+
+##### `break;`
+
+- **Purpose:** Terminates the `switch` statement after executing the `'User'` case.
+- **Benefit:** Prevents fall-through into subsequent cases, avoiding unintended logic execution or accidental overrides of the `container` variable.
+
+##### `case 'Repositories':`
+
+- **Purpose:** Initiates the switch branch for errors with a `context` value of `'Repositories'`.
+- **Benefit:** Isolates repository-related error handling, allowing issues tied to repository data or UI to be managed separately from other error types.
+
+##### `container = document.querySelector('.carousel') || this.userProfile;`
+
+- **Purpose:** Attempts to assign the `.carousel` DOM node to `container`; if not found, falls back to the user profile node (`this.userProfile`).
+- **Benefit:** Ensures that repository-related errors are displayed directly in the section where the carousel is intended to render. If the carousel element is not present, it safely falls back to the profile area to prevent null reference errors and guarantee that the message is still visible.
+
+##### `break;`
+
+- **Purpose:** Terminates the `switch` statement after executing the `'Repositories'` case.
+- **Benefit:** Prevents fall-through into subsequent cases, avoiding unintended logic execution or accidental overrides of the `container` variable.
+
+##### `case 'Image':`
+
+- **Purpose:** Initiates the switch branch for errors with a `context` value of `'Image'`.
+- **Benefit:** Allows image-specific errors (e.g., preview rendering failures) to be handled independently from data-fetching or repository-related issues, ensuring more accurate error reporting and easier debugging.
+
+##### `container = document.querySelector('.carousel');`
+
+- **Purpose:** Directly assigns the `.carousel` DOM node to `container`, without fallback.
+- **Benefit:** Ensures that image-related errors are rendered exactly where image previews appear, making them immediately visible to the user. If `.carousel`is missing, a later `if (!container) return;` check prevents runtime errors.
+
+##### `break;`
+
+- **Purpose:** Ends the execution of the `'Image'` case within the `switch`.
+- **Benefit:** Avoids fall-through into the `default` case and ensures that the container selected image errors remains unchanged.
+
+##### `default:`
+
+- **Purpose:** Handles any error whose `context` value does not match a predefined case.
+- **Benefit:** Provides a safety net for unexpected or undefined contexts, ensuring that all errors are processed and none are silently ignored.
+
+##### `container = this.userProfile;`
+
+- **Purpose:** Assigns the user profile DOM node as the default container for error messages.
+- **Benefit:** Guarantees that even unclassified errors are shown in a visible and stable UI location, preventing silent failures and maintaining user awareness.
+
+##### `if (!container) return;`
+
+- **Purpose:** Ensures that the `container` element exists before attempting to modify its content. This guard clause checks whether `container` is truthy (i.e., not `null` or `undefined`). If it's missing, the function exists to avoid executing invalid DOM operations.
+- **Benefit:** Prevents runtime exceptions such as `TypeError`, which would crash the application if the code tried to access properties of a non-existent DOM element. This keeps the UI stable and avoids breaking the user experience.
+
+##### `container.innerHTML = '<p>${error.message}</p>';`
+
+- **Purpose:** Injects the error message into the selected container by replacing its content with a `<p>` element. The use of template literals allows dynamic rendering of the error text, making the message context-aware and readable.
+- **Benefit:** Provides clear and immediate feedback to the user about what went wrong, improving transparency and aiding in debugging. It ensures that errors are not silently ignored and are instead communicated visually.
+
+##### `this.userProfile.classList.remove('hidden');`
+
+- **Purpose:** Ensures that the user profile section is visible after rendering the error message. By removing the `'hidden'` class, the code guarantees that the container holding the error is displayed on screen.
+- **Benefit:** Guarantees visibility of the error message, even if the profile section was previously hidden due to a failed request or empty state. This improves usability by making sure the user sees the feedback.
+
+##### `export { screen };`
+
+- **Purpose:** Exports the UI controller for use in other modules.
+- **Benefit:** Enables the entry script and others to trigger UI updates cleanly.<br><br>
