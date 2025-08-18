@@ -124,7 +124,7 @@ input:focus {
     margin-bottom: 1em;
 }
 
-.container div.profile-data div.info img {
+.container div.profile-data div.info img.avatar {
     width: 50%;
     border-radius: 50%;
     border: 10px solid var(--yellow);
@@ -148,7 +148,7 @@ input:focus {
 
 .container div.repositories h2,
 .container div.repositories p.repo-counter,
-.container div.repositories div.carousel img,
+.container div.repositories div.carousel img.preview-page,
 .container div.repositories div.carousel h3 {
     margin-bottom: 1em;
 }
@@ -158,7 +158,7 @@ input:focus {
     text-decoration: underline;
 }
 
-.container div.repositories div.carousel img {
+.container div.repositories div.carousel img.preview-page {
     width: 100%;
 }
 
@@ -297,7 +297,7 @@ input:focus {
         color: var(--black);
     }
 
-    .container div.repositories div.carousel img {
+    .container div.repositories div.carousel img.preview-page {
         max-height: 270px;
     }
 

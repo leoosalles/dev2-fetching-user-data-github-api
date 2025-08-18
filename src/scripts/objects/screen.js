@@ -9,12 +9,12 @@ const screen = {
     renderUser(userObj) {
         this.userProfile.innerHTML =
             `<div class="info">
-                    <img src="${userObj.avatarUrl}" alt="${userObj.name}'s GitHub Profile Picture">
+                    <img class="avatar" src="${userObj.avatarUrl}" alt="${userObj.name}'s GitHub Profile Picture">
                     <div class="data">
                         <h2>${userObj.name ?? "Name not provided 😢"}</h2>
                         <p>${userObj.bio ?? "This profile’s waiting for a story to tell 😢"}</p>
                     </div>
-                </div>`;
+             </div>`;
 
         this.userProfile.classList.remove('hidden');
     },
@@ -25,7 +25,7 @@ const screen = {
                         <h2>Repositories</h2>
                         <p class="repo-counter">Total repositories: 0</p>
                         <p role="alert">No repository found</p>
-                    </div>`
+                 </div>`
             );
 
             return;
@@ -40,7 +40,7 @@ const screen = {
                         <button id="btn-previous" class="btn-arrow" aria-label="Previous repository">previous repo</button>
                         <button id="btn-next" class="btn-arrow" aria-label="Next repository">next repo</button>
                     </div>
-                </div>`;
+             </div>`;
 
         this.userProfile.insertAdjacentHTML('beforeend', repoInfo);
 
@@ -85,10 +85,9 @@ const screen = {
         
         if (!container) return;
 
-        container.innerHTML = `
-            <p>${error.message}</p>`;
-        
-        
+        container.innerHTML =
+            `<p>${error.message}</p>`;
+
         this.userProfile.classList.remove('hidden');
     }
 };
