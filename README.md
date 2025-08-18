@@ -843,9 +843,11 @@ export { getUser };
 ##### `async function getUser(userName) {`
 
 - **Purpose:** Declares an asynchronous function that takes a GitHub username as its parameter.
-- **Benefit:** Enables the use of `await` inside the function and clearly scopes the username input for the API call.
+- **Benefit:** Enables the use of `await` inside the function and clearly scopes the username input for the API call.<br><br>
 
-##### `const response = await fetch('https://api.github.com/users/${userName}');`
+```js
+const response = await fetch(`https://api.github.com/users/${userName}`);
+```
 
 - **Purpose:** Sends an HTTP GET request to the GitHub Users API endpoint for the provided `userName`, waiting for network response.
 - **Benefit:** Retrieves the raw `Response` object from GitHub, allowing the caller to decide how to handle status codes and when/if to parse JSON.
@@ -895,9 +897,11 @@ export { getRepos };
 ##### `async function getRepos(userName) {`
 
 - **Purpose:** Defines an asynchronous function `getRepos` that accepts a GitHub username as an argument.
-- **Benefit:** Enables the function to perform asynchronous operations, like fetching repository data from the GitHub API.
+- **Benefit:** Enables the function to perform asynchronous operations, like fetching repository data from the GitHub API.<br><br>
 
-##### `const response = await fetch('https://api.github.com/users/${userName}/repos');`
+```js
+const response = await fetch(`https://api.github.com/users/${userName}/repos`);
+```
 
 - **Purpose:** Makes a `fetch` request to GitHub's API endpoint to retrieve the repositories of the specified user.
 - **Benefit:** Retrives the user's repository data in real time for dynamic display in the application.
@@ -915,9 +919,11 @@ export { getRepos };
 ##### `if (repos.length === 0) {`
 
 - **Purpose:** Checks if the returned repository array is empty.
-- **Benefit:** Provides a safeguard against displaying an empty carousel or list when a user has no repositories.
+- **Benefit:** Provides a safeguard against displaying an empty carousel or list when a user has no repositories.<br><br>
 
-##### `throw formatHttpError({ status: 404, url: 'https://api.github.com/users/${userName}/repos' }, 'Repositories')`
+```js
+throw formatHttpError({ status: 404, url: `https://api.github.com/users/${userName}/repos` }, 'Repositories')
+```
 
 - **Purpose:** Throws a custom formatted error indicating that no repositories were found.
 - **Benefit:** Provides clear feedback to the user when a GitHub account exists but has no repositories, maintaining consistent error messaging.
@@ -1055,9 +1061,11 @@ export { formatHttpError };
 ##### `message = "⚠️ An unexpected error occurred. Please check your connection or try again.";`
 
 - **Purpose:** Assigns a generic message for unknown errors.
-- **Benefit:** Gives users a helpful, non-technical prompt when the cause is unclear.
+- **Benefit:** Gives users a helpful, non-technical prompt when the cause is unclear.<br><br>
 
-##### `return { code: status, message, url, context, fullMessage: '${context} failed with status ${status}: ${message} [URL: ${url}] };'`
+```js
+return { code: status, message, url, context, fullMessage: `${context} failed with status ${status}: ${message} [URL: ${url}]` };
+```
 
 - **Purpose:** Returns a standardized error object containing:
   - `code`: the HTTP status,
@@ -1426,7 +1434,7 @@ renderRepo(userObj) {
 - **Purpose:** Re-renders the carousel with the previously selected repository.
 - **Benefit:** Instantly displays the selected repository.<br><br>
 
-#### ⚠️ renderError – Centralized Error Display
+#### ⚠️ Centralized Error Display
 
 ```js
 renderError(response, context = 'Request') {
@@ -1536,9 +1544,11 @@ renderError(response, context = 'Request') {
 ##### `if (!container) return;`
 
 - **Purpose:** Ensures that the `container` element exists before attempting to modify its content. This guard clause checks whether `container` is truthy (i.e., not `null` or `undefined`). If it's missing, the function exists to avoid executing invalid DOM operations.
-- **Benefit:** Prevents runtime exceptions such as `TypeError`, which would crash the application if the code tried to access properties of a non-existent DOM element. This keeps the UI stable and avoids breaking the user experience.
+- **Benefit:** Prevents runtime exceptions such as `TypeError`, which would crash the application if the code tried to access properties of a non-existent DOM element. This keeps the UI stable and avoids breaking the user experience.<br><br>
 
-##### `container.innerHTML = '<p>${error.message}</p>';`
+```js
+container.innerHTML = `<p>${error.message}</p>`;
+```
 
 - **Purpose:** Injects the error message into the selected container by replacing its content with a `<p>` element. The use of template literals allows dynamic rendering of the error text, making the message context-aware and readable.
 - **Benefit:** Provides clear and immediate feedback to the user about what went wrong, improving transparency and aiding in debugging. It ensures that errors are not silently ignored and are instead communicated visually.
@@ -1552,3 +1562,130 @@ renderError(response, context = 'Request') {
 
 - **Purpose:** Exports the UI controller for use in other modules.
 - **Benefit:** Enables the entry script and others to trigger UI updates cleanly.<br><br>
+
+### `carousel.js`
+
+#### 🎠 Dynamic Repository Preview Module
+
+```js
+import {currentUsername } from '../global.js';
+
+function updateRepoView(repo) {
+    const carousel = document.querySelector('.carousel');
+
+    if (!carousel || !repo) return;
+
+    let repoUrl = `https://${currentUsername}.github.io/${repo.name}`;
+    let previewImg = `https://api.microlink.io/?url=${encodeURIComponent(repoUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
+
+    console.log(`Preview URL: https://${currentUsername}.github.io/${repo.name}`);
+
+    carousel.innerHTML =
+        `<div class="image-loader">
+            <div class="loader"></div>
+         </div>`;
+
+    let img = new Image();
+    img.src = previewImg;
+    img.classList.add('preview-page');
+
+    img.onload = () => {
+        carousel.innerHTML =
+            `<img class="preview-page" src="${previewImg}" alt="Preview of ${repo.name}"/>
+             <h3><a href="${repo.html_url}" target="_blank" id="repo-link">${repo.name}</a></h3>`;
+    };
+
+    img.onerror = () => {
+        carousel.innerHTML =
+            `<p role="alert">⚠️ We couldn't load the image. Please try again later.</p>
+             <h3><a href="${repo.html_url}" target="_blank" id="repo-link">${repo.name}</a></h3>`;
+    };
+};
+
+export { updateRepoView };
+```
+
+##### `import { currentUsername } from '../global.js';`
+
+- **Purpose:** Imports the live `currentUsername` value across shared modules.
+- **Benefit:** Ensures the preview URL reflects the most recently searched GitHub user without manual prop-passing.
+
+##### `function updateRepoView(repo) {`
+
+- **Purpose:** Declares a function that updates the carousel view with a visual preview and link for the given repository.
+- **Benefit:** Encapsulates the logic for rendering repository previews, making the code modular and reusable.
+
+##### `const carousel = document.querySelector('.carousel');`
+
+- **Purpose:** Selects the DOM element with the class `.carousel`, which is the container for displaying repository previews.
+- **Benefit:** Targets the correct section of the UI for rendering the preview, ensuring visual consistency.
+
+##### `if (!carousel || !repo) return;`
+
+- **Purpose:** Checks whether the `carousel` element exists and whether a valid `repo` object was passed. If either is missing, the function exits early.
+- **Benefi:** Prevents runtime errors and unnecessary execution when required data or DOM elements are unavailable.<br><br>
+
+```js
+let repoUrl = `https://${currentUsername}.github.io/${repo.name}`;
+```
+
+- **Purpose:** Constructs the GitHub Pages URL for the repository using the current username and repository name.
+- **Benefit:** Dynamically generates the correct preview URL for each repository, enabling accurate screenshot rendering.<br><br>
+
+```js
+let previewImg = `https://api.microlink.io/?url=${encodeURIComponent(repoUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
+```
+
+- **Purpose:** Builds the URL for the Microlink API, which returns a screenshot image of `repoUrl`.
+- **Benefit:** Integrates third-party preview functionality, enhancing the user experience with visual feedback.
+
+##### `carousel.innerHTML = '<div class="image-loader"><div class="loader"></div></div>';`
+
+- **Purpose:** Temporarily displays a loading animation while the preview image is being fetched.
+- **Benefit:** Improves user experience by providing visual feedback during asynchronous image loading.
+
+##### `let img = new Image();`
+
+- **Purpose:** Instantiates a new `Image` object using the built-in JavaScript constructor. Unlike creating an `<img>` element via `document.createElement('img')`, this approach immediately creates an image in memory and begins loading once the `src` is assigned. This object is not yet attached to the DOM, allowing the developer to configure its behavior — such as setting classes or defining event handlers — before rendering it on the page.
+- **Benefit:** Provides full control over the image loading lifecycle. By using the `onload` and `onerror` event handlers, the application can respond to success or failure before the image is displayed. This enables smoother user experience, such as showing a loader during fetch, replacing it with the image on success, or displaying a fallback messaage if the image fails to load.
+
+##### `img.src = previewImg;`
+
+- **Purpose:** Sets the source of the image to the URL generated via Microlink.
+- **Benefit:** Initiates the image loading process for the repository preview.
+
+##### `img.classList.add('preview-page');`
+
+- **Purpose:** Adds a CSS class to the image for styling purposes.
+- **Benefit:** Ensures consistent styling of preview images across the UI.
+
+##### 🔁 Image Load Handler
+```js
+img.onload = () => {
+    carousel.innerHTML =
+        `<img class="preview-page" src="${previewImg}" alt="Preview of ${repo.name}"/>
+         <h3><a href="${repo.html_url}" target="_blank" id="repo-link">${repo.name}</a></h3>`;
+};
+```
+
+- **Purpose:** Defines a callback that runs when the image loads successfully. It replaces the loader with the actual image and a link to the repository.
+- **Benefit:** Provides a smooth transition from loading state to preview, enhancing usability and visual feedback.
+
+##### ❌ Image Error Handler
+```js
+img.onerror = () => {
+    carousel.innerHTML =
+        `<p role="alert">⚠️ We couldn't load the image. Please try again later.</p>
+         <h3><a href="${repo.html_url}" target="_blank" id="repo-link">${repo.name}</a></h3>`;
+};
+```
+
+- **Purpose:** Defines a callback that runs if the image fails to load. It displays an error message and still shows the repository link.
+- **Benefit:** Ensures graceful degradation — even if the preview fails, the user can still access the repository.
+
+##### `export { updateRepoView };`
+
+- **Purpose:** Makes the `updateRepoView` function available to other modules.
+- **Benefit:** Promotes modular architecture and code reuse across the application.<br><br>
+
+---
