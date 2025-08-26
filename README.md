@@ -1,6 +1,6 @@
-# 🔎 GitHub User Search
+# 🔎 GitHub User Explorer
 
-**GitHub User Search** is a front-end web application that allows users to search for GitHub profiles and explore their repositories dynamically. Built with **HTML5**, **CSS3**, and **JavaScript (ES6 modules)**, it demonstrates asynchronous API calls, modular code architecture, and accessible UI design.
+**GitHub User Explorer** is a front-end web application that allows users to search for GitHub profiles and explore their repositories dynamically. Built with **HTML5**, **CSS3**, and **JavaScript (ES6 modules)**, it demonstrates asynchronous API calls, modular code architecture, and accessible UI design.
 
 The app fetches user data and repositories from the **GitHub REST API**, displays profile details, and includes a carousel feature to browse repositories with live preview images generated via an external screenshot API. Error handling is comprehensive and user-friendly, ensuring smooth user experience even when API limits or errors occur.
 
