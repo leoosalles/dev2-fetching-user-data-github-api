@@ -27,8 +27,8 @@ This project was proposed to students of the Dev Quest course as part of the Adv
 ┃ ┃ ┣ 📄 style.css
 ┃ ┃ ┗ 📄 reset.css
 ┃ ┗ 📂 scripts/
-┃   ┣ 📄 global.html
-┃   ┣ 📄 index.html
+┃   ┣ 📄 global.js
+┃   ┣ 📄 index.js
 ┃   ┣ 📂 utils/
 ┃   ┃ ┣ 📄 carousel.js
 ┃   ┃ ┗ 📄 formatHttpError.js
