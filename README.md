@@ -133,7 +133,7 @@ This project was proposed to students of the Dev Quest course as part of the Adv
 
 **Why *not* `display: none` or `visibility: hidden`?**
 
-Because this is an **ARIA live region**. Using `display: none` (or sometimes `visibility: hidden`) removes the node from many assistive technology trees, which can suppress announcements. Your approach keeps the region alive for screen readers while it’s visually hidden, so updates can be announced when it becomes visible.
+Because this is an **ARIA live region**. Using `display: none` (or sometimes `visibility: hidden`) removes the node from many assistive technology trees, which can suppress announcements. This approach keeps the region alive for screen readers while it’s visually hidden, so updates can be announced when it becomes visible.
 
 **How this aligns with the JavaScript flow:**
 - On load, the container has the `hidden` class, making it invisible and non-interactive—no empty box or “blank region” is announced by assistive technologies.
